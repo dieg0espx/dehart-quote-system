@@ -1,6 +1,4 @@
-import { put, list, head } from "@vercel/blob";
-
-const BLOB_KEY = "submissions.json";
+import { neon } from "@neondatabase/serverless";
 
 export interface Submission {
   id: number;
@@ -18,67 +16,73 @@ export interface Submission {
   status: "new" | "contacted" | "closed";
 }
 
-async function getBlob(): Promise<Submission[]> {
-  try {
-    const { blobs } = await list({ prefix: BLOB_KEY });
-    if (blobs.length === 0) return [];
-    const latest = blobs.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0];
-    const res = await fetch(latest.url);
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
-    return [];
+function getDb() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is not set");
   }
-}
-
-async function saveBlob(submissions: Submission[]): Promise<void> {
-  // Clean up old blobs
-  const { blobs } = await list({ prefix: BLOB_KEY });
-  for (const blob of blobs) {
-    try {
-      const { del } = await import("@vercel/blob");
-      await del(blob.url);
-    } catch { /* ignore */ }
-  }
-  await put(BLOB_KEY, JSON.stringify(submissions, null, 2), {
-    access: "public",
-    contentType: "application/json",
-    addRandomSuffix: false,
-  });
+  return neon(process.env.DATABASE_URL);
 }
 
 export async function insertSubmission(data: Omit<Submission, "id" | "timestamp" | "status">) {
-  const submissions = await getBlob();
-  const nextId = submissions.length > 0 ? Math.max(...submissions.map((s) => s.id)) + 1 : 1;
-  const newSubmission: Submission = {
-    id: nextId,
-    timestamp: new Date().toISOString(),
-    ...data,
-    status: "new",
-  };
-  submissions.unshift(newSubmission);
-  await saveBlob(submissions);
-  return nextId;
+  const sql = getDb();
+  const result = await sql`
+    INSERT INTO submissions (name, email, phone, project_type, unit_type, quality, access, sqft, estimate_range, message, status)
+    VALUES (${data.name}, ${data.email}, ${data.phone}, ${data.projectType}, ${data.unitType}, ${data.quality}, ${data.access}, ${data.sqft}, ${data.estimateRange}, ${data.message}, 'new')
+    RETURNING id
+  `;
+  return result[0].id;
 }
 
 export async function getAllSubmissions(): Promise<Submission[]> {
-  const submissions = await getBlob();
-  return submissions.sort((a, b) => b.id - a.id);
+  const sql = getDb();
+  const results = await sql`
+    SELECT
+      id,
+      timestamp,
+      name,
+      email,
+      phone,
+      project_type as "projectType",
+      unit_type as "unitType",
+      quality,
+      access,
+      sqft,
+      estimate_range as "estimateRange",
+      message,
+      status
+    FROM submissions
+    ORDER BY id DESC
+  `;
+  return results as Submission[];
 }
 
 export async function updateSubmissionStatus(id: number, status: string) {
-  if (!["new", "contacted", "closed"].includes(status)) throw new Error("Invalid status");
-  const submissions = await getBlob();
-  const idx = submissions.findIndex((s) => s.id === id);
-  if (idx === -1) throw new Error("Submission not found");
-  submissions[idx].status = status as Submission["status"];
-  await saveBlob(submissions);
+  if (!["new", "contacted", "closed"].includes(status)) {
+    throw new Error("Invalid status");
+  }
+  const sql = getDb();
+  await sql`
+    UPDATE submissions
+    SET status = ${status}
+    WHERE id = ${id}
+  `;
   return { changes: 1 };
 }
 
 export async function getStats() {
-  const submissions = await getBlob();
-  const map: Record<string, number> = { new: 0, contacted: 0, closed: 0 };
-  submissions.forEach((s) => { map[s.status] = (map[s.status] || 0) + 1; });
-  return { total: submissions.length, ...map };
+  const sql = getDb();
+  const results = await sql`
+    SELECT
+      COUNT(*) as total,
+      SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END) as new,
+      SUM(CASE WHEN status = 'contacted' THEN 1 ELSE 0 END) as contacted,
+      SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) as closed
+    FROM submissions
+  `;
+  return {
+    total: Number(results[0].total),
+    new: Number(results[0].new),
+    contacted: Number(results[0].contacted),
+    closed: Number(results[0].closed),
+  };
 }
