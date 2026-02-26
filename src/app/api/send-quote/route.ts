@@ -3,12 +3,27 @@ import nodemailer from "nodemailer";
 import { insertSubmission } from "@/lib/db";
 
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { name, email, phone, projectType, unitType, quality, access, sqft, estimateRange, message } = body;
+  const body = await request.json();
+  const { name, email, phone, projectType, unitType, quality, access, sqft, estimateRange, message } = body;
 
-    if (!name || !email) {
-      return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+  if (!name || !email) {
+    return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+  }
+
+  // Save to database first (this should always work)
+  try {
+    await insertSubmission({ name, email, phone, projectType, unitType, quality, access, sqft, estimateRange, message });
+    console.log("✓ Submission saved to database");
+  } catch (dbError) {
+    console.error("Database error:", dbError);
+    return NextResponse.json({ error: "Failed to save submission" }, { status: 500 });
+  }
+
+  // Try to send emails (don't fail the request if this fails)
+  try {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      console.warn("⚠️ Email credentials not configured");
+      return NextResponse.json({ success: true, warning: "Saved but email not sent (credentials missing)" });
     }
 
     const transporter = nodemailer.createTransport({
@@ -91,9 +106,6 @@ export async function POST(request: Request) {
       </div>
     </div>`;
 
-    // Save to database
-    await insertSubmission({ name, email, phone, projectType, unitType, quality, access, sqft, estimateRange, message });
-
     // Send to business
     await transporter.sendMail({
       from: `"DeHart HVAC" <${process.env.EMAIL_USER}>`,
@@ -101,6 +113,7 @@ export async function POST(request: Request) {
       subject: `New HVAC Quote Request from ${name}`,
       html: htmlTemplate,
     });
+    console.log("✓ Business email sent");
 
     // Send confirmation to client
     await transporter.sendMail({
@@ -109,10 +122,15 @@ export async function POST(request: Request) {
       subject: "Your DeHart HVAC Quote Estimate",
       html: clientHtml,
     });
+    console.log("✓ Client email sent");
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Email error:", error);
-    return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
+  } catch (emailError) {
+    console.error("⚠️ Email error:", emailError);
+    // Still return success since database save worked
+    return NextResponse.json({
+      success: true,
+      warning: "Saved but email notification failed"
+    });
   }
 }
