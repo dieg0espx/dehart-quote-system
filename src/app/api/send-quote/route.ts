@@ -72,8 +72,8 @@ export async function POST(request: Request) {
 
     const htmlTemplate = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
-      <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:30px;text-align:center;">
-        <div style="width:50px;height:50px;background:white;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#2563eb;font-size:18px;line-height:50px;">DH</div>
+      <div style="background:linear-gradient(135deg,#DC2626,#B91C1C);padding:30px;text-align:center;">
+        <img src="https://dehart-hvac.vercel.app/logo.png" alt="DeHart HVAC" style="width:60px;height:60px;margin:0 auto;display:block;" />
         <h1 style="color:white;margin:12px 0 0;font-size:22px;">DeHart HVAC Quote</h1>
       </div>
       <div style="padding:24px;">
@@ -90,8 +90,8 @@ export async function POST(request: Request) {
 
     const clientHtml = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
-      <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:30px;text-align:center;">
-        <div style="width:50px;height:50px;background:white;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#2563eb;font-size:18px;line-height:50px;">DH</div>
+      <div style="background:linear-gradient(135deg,#DC2626,#B91C1C);padding:30px;text-align:center;">
+        <img src="https://dehart-hvac.vercel.app/logo.png" alt="DeHart HVAC" style="width:60px;height:60px;margin:0 auto;display:block;" />
         <h1 style="color:white;margin:12px 0 0;font-size:22px;">Your DeHart HVAC Quote</h1>
       </div>
       <div style="padding:24px;">
