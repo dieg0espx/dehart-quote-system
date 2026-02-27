@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     const htmlTemplate = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
       <div style="background:linear-gradient(135deg,#DC2626,#B91C1C);padding:30px;text-align:center;">
-        <img src="https://dehart-hvac.vercel.app/logo.png" alt="DeHart HVAC" style="width:60px;height:60px;margin:0 auto;display:block;" />
+        <img src="https://dehart-quote-system.vercel.app/_next/image?url=%2Flogo.png&w=64&q=75" alt="DeHart HVAC" style="width:60px;height:60px;margin:0 auto;display:block;" />
         <h1 style="color:white;margin:12px 0 0;font-size:22px;">DeHart HVAC Quote</h1>
       </div>
       <div style="padding:24px;">
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     const clientHtml = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
       <div style="background:linear-gradient(135deg,#DC2626,#B91C1C);padding:30px;text-align:center;">
-        <img src="https://dehart-hvac.vercel.app/logo.png" alt="DeHart HVAC" style="width:60px;height:60px;margin:0 auto;display:block;" />
+        <img src="https://dehart-quote-system.vercel.app/_next/image?url=%2Flogo.png&w=64&q=75" alt="DeHart HVAC" style="width:60px;height:60px;margin:0 auto;display:block;" />
         <h1 style="color:white;margin:12px 0 0;font-size:22px;">Your DeHart HVAC Quote</h1>
       </div>
       <div style="padding:24px;">
