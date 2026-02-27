@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import Image from "next/image";
 
 const PRICING = [
   { access: "Hallway", sqft: ">1800", quality: "Good", estimate: 8000, range: "$8,000–$13,000" },
@@ -36,8 +37,8 @@ function Card({
       className={`relative flex flex-col items-center gap-2 rounded-2xl border-2 p-6 sm:p-8 transition-all duration-200 cursor-pointer w-full
         ${
           selected
-            ? "border-[#EC2225] bg-[#FEE2E2] shadow-lg scale-[1.02]"
-            : "border-gray-200 bg-white hover:border-[#FCA5A5] hover:shadow-md"
+            ? "border-[#EC2225] bg-white shadow-lg scale-[1.02]"
+            : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
         }`}
     >
       <span className="text-4xl sm:text-5xl">{icon}</span>
@@ -222,12 +223,12 @@ export default function Home() {
   const slideClass = animating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-[#FEE2E2] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 mb-3">
-            <img src="/logo.png" alt="DeHart HVAC" className="w-full h-full object-contain" />
+            <Image src="/logo.png" alt="DeHart HVAC" width={64} height={64} className="object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">DeHart HVAC</h1>
           <p className="text-gray-500 mt-1">Get your instant cost estimate</p>
@@ -415,13 +416,13 @@ export default function Home() {
                     </div>
                   </>
                 ) : (
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#FEE2E2] text-4xl mb-2">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 text-4xl mb-2">
                     📋
                   </div>
                 )}
                 <p
                   className={`text-base leading-relaxed ${
-                    result.type === "estimate" ? "text-green-800" : "text-[#991B1B]"
+                    result.type === "estimate" ? "text-green-800" : "text-gray-700"
                   }`}
                 >
                   {result.message}
