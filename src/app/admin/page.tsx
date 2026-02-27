@@ -27,7 +27,7 @@ interface Stats {
 
 const STATUS_COLORS: Record<string, string> = {
   new: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  contacted: "bg-blue-100 text-blue-800 border-blue-300",
+  contacted: "bg-[#FEE2E2] text-[#991B1B] border-[#FCA5A5]",
   closed: "bg-green-100 text-green-800 border-green-300",
 };
 
@@ -150,11 +150,11 @@ export default function AdminPage() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-[#FEE2E2] flex items-center justify-center p-4">
         <form onSubmit={handleLogin} className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm space-y-4">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-600 text-white text-xl font-bold mb-3 shadow-lg">
-              DH
+            <div className="inline-flex items-center justify-center w-14 h-14 mb-3">
+              <img src="/logo.png" alt="DeHart HVAC" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-gray-500 text-sm mt-1">Enter password to continue</p>
@@ -164,13 +164,13 @@ export default function AdminPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-blue-500 focus:outline-none transition"
+            className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-[#EC2225] focus:outline-none transition"
             placeholder="Password"
             autoFocus
           />
           <button
             type="submit"
-            className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-md cursor-pointer"
+            className="w-full px-6 py-3 bg-[#DC2626] text-white font-semibold rounded-xl hover:bg-[#B91C1C] transition shadow-md cursor-pointer"
           >
             Sign In
           </button>
@@ -180,13 +180,13 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 sm:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-[#FEE2E2] p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white text-sm font-bold shadow">
-              DH
+            <div className="inline-flex items-center justify-center w-10 h-10">
+              <img src="/logo.png" alt="DeHart HVAC" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">DeHart HVAC Admin</h1>
@@ -210,7 +210,7 @@ export default function AdminPage() {
           {[
             { label: "Total", value: stats.total, color: "bg-white border-gray-200" },
             { label: "New", value: stats.new, color: "bg-yellow-50 border-yellow-200" },
-            { label: "Contacted", value: stats.contacted, color: "bg-blue-50 border-blue-200" },
+            { label: "Contacted", value: stats.contacted, color: "bg-[#FEE2E2] border-[#FCA5A5]" },
             { label: "Closed", value: stats.closed, color: "bg-green-50 border-green-200" },
           ].map((s) => (
             <div key={s.label} className={`rounded-2xl border-2 p-5 ${s.color}`}>
@@ -226,7 +226,7 @@ export default function AdminPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-80 rounded-xl border-2 border-gray-200 px-4 py-2.5 text-gray-900 focus:border-blue-500 focus:outline-none transition"
+            className="w-full sm:w-80 rounded-xl border-2 border-gray-200 px-4 py-2.5 text-gray-900 focus:border-[#EC2225] focus:outline-none transition"
             placeholder="Search by name or email..."
           />
         </div>
@@ -251,7 +251,7 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {filtered.map((s) => (
-                    <tr key={s.id} className="border-b border-gray-100 hover:bg-blue-50/30 transition">
+                    <tr key={s.id} className="border-b border-gray-100 hover:bg-[#FEE2E2]/30 transition">
                       <td className="px-4 py-3 whitespace-nowrap text-gray-500">
                         {new Date(s.timestamp + "Z").toLocaleDateString("en-US", {
                           month: "short", day: "numeric", year: "numeric",

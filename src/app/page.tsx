@@ -36,8 +36,8 @@ function Card({
       className={`relative flex flex-col items-center gap-2 rounded-2xl border-2 p-6 sm:p-8 transition-all duration-200 cursor-pointer w-full
         ${
           selected
-            ? "border-blue-500 bg-blue-50 shadow-lg scale-[1.02]"
-            : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-md"
+            ? "border-[#EC2225] bg-[#FEE2E2] shadow-lg scale-[1.02]"
+            : "border-gray-200 bg-white hover:border-[#FCA5A5] hover:shadow-md"
         }`}
     >
       <span className="text-4xl sm:text-5xl">{icon}</span>
@@ -54,7 +54,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
         <div
           key={i}
           className={`h-2 flex-1 rounded-full transition-all duration-500 ${
-            i < current ? "bg-blue-500" : i === current ? "bg-blue-300" : "bg-gray-200"
+            i < current ? "bg-[#EC2225]" : i === current ? "bg-[#FCA5A5]" : "bg-gray-200"
           }`}
         />
       ))}
@@ -222,12 +222,12 @@ export default function Home() {
   const slideClass = animating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-[#FEE2E2] flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-600 text-white text-2xl font-bold mb-3 shadow-lg">
-            DH
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-3">
+            <img src="/logo.png" alt="DeHart HVAC" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">DeHart HVAC</h1>
           <p className="text-gray-500 mt-1">Get your instant cost estimate</p>
@@ -242,7 +242,7 @@ export default function Home() {
           {step > 0 && currentStepName !== "results" && (
             <button
               onClick={goBack}
-              className="self-start flex items-center gap-1 text-sm text-gray-500 hover:text-blue-600 transition mb-4 cursor-pointer"
+              className="self-start flex items-center gap-1 text-sm text-gray-500 hover:text-[#DC2626] transition mb-4 cursor-pointer"
             >
               <span>←</span> Back
             </button>
@@ -365,7 +365,7 @@ export default function Home() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-blue-500 focus:outline-none transition"
+                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-[#EC2225] focus:outline-none transition"
                     placeholder="John Doe"
                   />
                 </div>
@@ -377,7 +377,7 @@ export default function Home() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-blue-500 focus:outline-none transition"
+                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-[#EC2225] focus:outline-none transition"
                     placeholder="john@example.com"
                   />
                 </div>
@@ -389,14 +389,14 @@ export default function Home() {
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-blue-500 focus:outline-none transition"
+                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-[#EC2225] focus:outline-none transition"
                     placeholder="(555) 123-4567"
                   />
                 </div>
                 <button
                   onClick={handleUserInfoSubmit}
                   disabled={!name.trim() || !email.trim()}
-                  className="w-full mt-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full mt-2 px-6 py-3 bg-[#DC2626] text-white font-semibold rounded-xl hover:bg-[#B91C1C] transition shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Get My Estimate →
                 </button>
@@ -415,13 +415,13 @@ export default function Home() {
                     </div>
                   </>
                 ) : (
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-100 text-4xl mb-2">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#FEE2E2] text-4xl mb-2">
                     📋
                   </div>
                 )}
                 <p
                   className={`text-base leading-relaxed ${
-                    result.type === "estimate" ? "text-green-800" : "text-blue-800"
+                    result.type === "estimate" ? "text-green-800" : "text-[#991B1B]"
                   }`}
                 >
                   {result.message}
@@ -444,7 +444,7 @@ export default function Home() {
 
                 <button
                   onClick={reset}
-                  className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-md cursor-pointer"
+                  className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-[#DC2626] text-white font-semibold rounded-xl hover:bg-[#B91C1C] transition shadow-md cursor-pointer"
                 >
                   ↺ Start Over
                 </button>
