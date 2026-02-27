@@ -31,6 +31,9 @@ const STATUS_COLORS: Record<string, string> = {
   closed: "bg-green-100 text-green-800 border-green-300",
 };
 
+const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const SESSION_KEY = "dehart_admin_session";
+
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
@@ -40,6 +43,38 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Save session to localStorage
+  const saveSession = useCallback((pw: string) => {
+    const session = {
+      password: pw,
+      expiresAt: Date.now() + SESSION_DURATION,
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  }, []);
+
+  // Load session from localStorage
+  const loadSession = useCallback(() => {
+    try {
+      const stored = localStorage.getItem(SESSION_KEY);
+      if (!stored) return null;
+
+      const session = JSON.parse(stored);
+      if (Date.now() > session.expiresAt) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
+
+      return session.password;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // Clear session from localStorage
+  const clearSession = useCallback(() => {
+    localStorage.removeItem(SESSION_KEY);
+  }, []);
+
   const fetchData = useCallback(async (pw: string) => {
     setLoading(true);
     try {
@@ -47,7 +82,11 @@ export default function AdminPage() {
         headers: { "x-admin-password": pw },
       });
       if (!res.ok) {
-        if (res.status === 401) { setError("Invalid password"); setAuthenticated(false); }
+        if (res.status === 401) {
+          setError("Invalid password");
+          setAuthenticated(false);
+          clearSession();
+        }
         else setError("Failed to load data");
         return;
       }
@@ -60,13 +99,24 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [clearSession]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setAuthenticated(true);
+    saveSession(password);
     fetchData(password);
   };
+
+  // Check for existing session on mount
+  useEffect(() => {
+    const storedPassword = loadSession();
+    if (storedPassword) {
+      setPassword(storedPassword);
+      setAuthenticated(true);
+      fetchData(storedPassword);
+    }
+  }, [loadSession, fetchData]);
 
   useEffect(() => {
     if (authenticated) fetchData(password);
@@ -144,7 +194,11 @@ export default function AdminPage() {
             </div>
           </div>
           <button
-            onClick={() => { setAuthenticated(false); setPassword(""); }}
+            onClick={() => {
+              setAuthenticated(false);
+              setPassword("");
+              clearSession();
+            }}
             className="text-sm text-gray-500 hover:text-red-600 transition cursor-pointer"
           >
             Sign Out
