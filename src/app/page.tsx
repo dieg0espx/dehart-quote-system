@@ -188,6 +188,7 @@ export default function Home() {
       });
       if (res.ok) {
         setEmailSent(true);
+        window.location.href = "https://dehartac.com/quote-thank-you/";
       } else {
         const data = await res.json();
         setEmailError(data.error || "Failed to send email");
