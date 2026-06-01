@@ -263,9 +263,9 @@ export default function AdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
-                    {["Date", "Name", "Email", "Phone", "Project", "Unit", "Quality", "Access", "SqFt", "Estimate", "Status", "Actions"].map((h) => (
+                    {["Date", "Name", "Email", "Phone", "Project", "Unit", "Quality", "Access", "SqFt", "Estimate", "Status"].map((h) => (
                       <th key={h} className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">
-                        {h === "Actions" ? "" : h}
+                        {h}
                       </th>
                     ))}
                   </tr>
@@ -307,15 +307,6 @@ export default function AdminPage() {
                           <option value="closed">Closed</option>
                           <option value="archived">Archived</option>
                         </select>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-right">
-                        <button
-                          type="button"
-                          onClick={() => updateStatus(s.id, s.status === "archived" ? "new" : "archived")}
-                          className="text-xs font-semibold text-gray-500 hover:text-red-600 transition cursor-pointer"
-                        >
-                          {s.status === "archived" ? "Unarchive" : "Archive"}
-                        </button>
                       </td>
                     </tr>
                   ))}
