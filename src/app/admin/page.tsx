@@ -126,11 +126,16 @@ export default function AdminPage() {
   }, [authenticated, password, fetchData]);
 
   const updateStatus = async (id: number, status: string) => {
-    await fetch(`/api/submissions/${id}`, {
+    const res = await fetch(`/api/submissions/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", "x-admin-password": password },
       body: JSON.stringify({ status }),
     });
+    if (!res.ok) {
+      setError("Failed to update status");
+      fetchData(password);
+      return;
+    }
     setSubmissions((prev) =>
       prev.map((s) => (s.id === id ? { ...s, status: status as Submission["status"] } : s))
     );
