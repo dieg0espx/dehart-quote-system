@@ -16,7 +16,7 @@ interface Submission {
   sqft: string | null;
   estimateRange: string | null;
   message: string | null;
-  status: "new" | "contacted" | "closed";
+  status: "new" | "contacted" | "closed" | "archived";
 }
 
 interface Stats {
@@ -30,6 +30,7 @@ const STATUS_COLORS: Record<string, string> = {
   new: "bg-yellow-100 text-yellow-800 border-yellow-300",
   contacted: "bg-blue-100 text-blue-800 border-blue-300",
   closed: "bg-green-100 text-green-800 border-green-300",
+  archived: "bg-gray-100 text-gray-700 border-gray-300",
 };
 
 const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
@@ -41,6 +42,7 @@ export default function AdminPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, new: 0, contacted: 0, closed: 0 });
   const [search, setSearch] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -132,18 +134,25 @@ export default function AdminPage() {
     setSubmissions((prev) =>
       prev.map((s) => (s.id === id ? { ...s, status: status as Submission["status"] } : s))
     );
-    // Update stats locally
+    // Update stats locally (archived is not tracked in the Stats card grid)
     setStats((prev) => {
       const old = submissions.find((s) => s.id === id)!;
-      return {
-        ...prev,
-        [old.status]: prev[old.status as keyof Stats] as number - 1,
-        [status]: (prev[status as keyof Stats] as number) + 1,
-      };
+      const next = { ...prev };
+      if (old.status in next) {
+        const k = old.status as keyof Stats;
+        next[k] = (next[k] as number) - 1;
+      }
+      if (status in next) {
+        const k = status as keyof Stats;
+        next[k] = (next[k] as number) + 1;
+      }
+      return next;
     });
   };
 
   const filtered = submissions.filter((s) => {
+    if (!showArchived && s.status === "archived") return false;
+    if (showArchived && s.status !== "archived") return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q);
@@ -182,7 +191,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
@@ -222,7 +231,7 @@ export default function AdminPage() {
         </div>
 
         {/* Search */}
-        <div className="mb-4">
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
           <input
             type="text"
             value={search}
@@ -230,6 +239,17 @@ export default function AdminPage() {
             className="w-full sm:w-80 rounded-xl border-2 border-gray-200 px-4 py-2.5 text-gray-900 focus:border-[#EC2225] focus:outline-none transition"
             placeholder="Search by name or email..."
           />
+          <button
+            type="button"
+            onClick={() => setShowArchived((v) => !v)}
+            className={`px-4 py-2.5 rounded-xl border-2 text-sm font-semibold transition cursor-pointer ${
+              showArchived
+                ? "bg-gray-900 text-white border-gray-900"
+                : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
+            }`}
+          >
+            {showArchived ? "Showing Archived" : "Show Archived"}
+          </button>
         </div>
 
         {/* Table */}
@@ -243,9 +263,9 @@ export default function AdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
-                    {["Date", "Name", "Email", "Phone", "Project", "Unit", "Quality", "Access", "SqFt", "Estimate", "Status"].map((h) => (
+                    {["Date", "Name", "Email", "Phone", "Project", "Unit", "Quality", "Access", "SqFt", "Estimate", "Status", "Actions"].map((h) => (
                       <th key={h} className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">
-                        {h}
+                        {h === "Actions" ? "" : h}
                       </th>
                     ))}
                   </tr>
@@ -254,9 +274,14 @@ export default function AdminPage() {
                   {filtered.map((s) => (
                     <tr key={s.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
                       <td className="px-4 py-3 whitespace-nowrap text-gray-500">
-                        {new Date(s.timestamp + "Z").toLocaleDateString("en-US", {
-                          month: "short", day: "numeric", year: "numeric",
-                        })}
+                        {(() => {
+                          const raw = s.timestamp?.replace(" ", "T");
+                          const iso = raw && !/[Zz]|[+-]\d{2}:?\d{2}$/.test(raw) ? raw + "Z" : raw;
+                          const d = iso ? new Date(iso) : null;
+                          return d && !isNaN(d.getTime())
+                            ? d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                            : "—";
+                        })()}
                       </td>
                       <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{s.name}</td>
                       <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{s.email}</td>
@@ -280,7 +305,17 @@ export default function AdminPage() {
                           <option value="new">New</option>
                           <option value="contacted">Contacted</option>
                           <option value="closed">Closed</option>
+                          <option value="archived">Archived</option>
                         </select>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-right">
+                        <button
+                          type="button"
+                          onClick={() => updateStatus(s.id, s.status === "archived" ? "new" : "archived")}
+                          className="text-xs font-semibold text-gray-500 hover:text-red-600 transition cursor-pointer"
+                        >
+                          {s.status === "archived" ? "Unarchive" : "Archive"}
+                        </button>
                       </td>
                     </tr>
                   ))}

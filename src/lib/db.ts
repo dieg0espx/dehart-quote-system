@@ -13,7 +13,7 @@ export interface Submission {
   sqft: string | null;
   estimateRange: string | null;
   message: string | null;
-  status: "new" | "contacted" | "closed";
+  status: "new" | "contacted" | "closed" | "archived";
 }
 
 function getDb() {
@@ -57,7 +57,7 @@ export async function getAllSubmissions(): Promise<Submission[]> {
 }
 
 export async function updateSubmissionStatus(id: number, status: string) {
-  if (!["new", "contacted", "closed"].includes(status)) {
+  if (!["new", "contacted", "closed", "archived"].includes(status)) {
     throw new Error("Invalid status");
   }
   const sql = getDb();
