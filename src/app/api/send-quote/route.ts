@@ -110,7 +110,7 @@ export async function POST(request: Request) {
     // Send to business
     await transporter.sendMail({
       from: `"DeHart HVAC" <${process.env.EMAIL_USER}>`,
-      to: "tecnodael@gmail.com, production@intellegomedia.com, Karrie@dehartair.com, sdehart@dehartair.com, dsmith@dehartair.com, jdehart@ymail.com, receptionist2@dehartair.com, receptionist@dehartair.com",
+      to: "production@intellegomedia.com, Karrie@dehartair.com, sdehart@dehartair.com, dsmith@dehartair.com, jdehart@ymail.com, receptionist2@dehartair.com, receptionist@dehartair.com",
       subject: `New HVAC Quote Request from ${name}`,
       html: htmlTemplate,
     });
