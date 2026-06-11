@@ -5,11 +5,11 @@ import { checkAdminPassword } from "@/lib/auth";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, email, phone, projectType, unitType, quality, access, sqft, estimateRange, message } = body;
+    const { name, email, phone, address, projectType, unitType, quality, access, sqft, estimateRange, message } = body;
     if (!name || !email) {
       return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
     }
-    const id = await insertSubmission({ name, email, phone, projectType, unitType, quality, access, sqft, estimateRange, message });
+    const id = await insertSubmission({ name, email, phone, address, projectType, unitType, quality, access, sqft, estimateRange, message });
     return NextResponse.json({ success: true, id });
   } catch (error) {
     console.error("Submission error:", error);

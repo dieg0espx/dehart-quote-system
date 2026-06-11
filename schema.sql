@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
   phone VARCHAR(50),
+  address TEXT,
   project_type VARCHAR(100),
   unit_type VARCHAR(100),
   quality VARCHAR(100),
@@ -16,6 +17,9 @@ CREATE TABLE IF NOT EXISTS submissions (
   message TEXT,
   status VARCHAR(20) DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'closed'))
 );
+
+-- For existing databases, add the address column if it doesn't exist
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS address TEXT;
 
 -- Create an index on status for faster filtering
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);

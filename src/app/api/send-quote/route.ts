@@ -4,7 +4,7 @@ import { insertSubmission } from "@/lib/db";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { name, email, phone, projectType, unitType, quality, access, sqft, estimateRange, message } = body;
+  const { name, email, phone, address, projectType, unitType, quality, access, sqft, estimateRange, message } = body;
 
   if (!name || !email) {
     return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
   // Save to database first (this should always work)
   try {
-    await insertSubmission({ name, email, phone, projectType, unitType, quality, access, sqft, estimateRange, message });
+    await insertSubmission({ name, email, phone, address, projectType, unitType, quality, access, sqft, estimateRange, message });
     console.log("✓ Submission saved to database");
   } catch (dbError) {
     console.error("Database error:", dbError);
@@ -82,6 +82,7 @@ export async function POST(request: Request) {
         <p style="margin:4px 0;color:#334155;"><strong>Name:</strong> ${name}</p>
         <p style="margin:4px 0;color:#334155;"><strong>Email:</strong> ${email}</p>
         ${phone ? `<p style="margin:4px 0;color:#334155;"><strong>Phone:</strong> ${phone}</p>` : ""}
+        ${address ? `<p style="margin:4px 0;color:#334155;"><strong>Address:</strong> ${address}</p>` : ""}
         <h2 style="color:#1e293b;font-size:18px;margin:20px 0 8px;">Selections</h2>
         ${selectionsHtml}
         ${estimateSection}

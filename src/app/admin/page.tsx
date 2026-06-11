@@ -9,6 +9,7 @@ interface Submission {
   name: string;
   email: string;
   phone: string | null;
+  address: string | null;
   projectType: string | null;
   unitType: string | null;
   quality: string | null;
@@ -268,7 +269,7 @@ export default function AdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
-                    {["Date", "Name", "Email", "Phone", "Project", "Unit", "Quality", "Access", "SqFt", "Estimate", "Status"].map((h) => (
+                    {["Date", "Name", "Email", "Phone", "Address", "Project", "Unit", "Quality", "Access", "SqFt", "Estimate", "Status"].map((h) => (
                       <th key={h} className="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">
                         {h}
                       </th>
@@ -291,6 +292,7 @@ export default function AdminPage() {
                       <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{s.name}</td>
                       <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{s.email}</td>
                       <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{s.phone || "—"}</td>
+                      <td className="px-4 py-3 text-gray-600 max-w-xs truncate" title={s.address || ""}>{s.address || "—"}</td>
                       <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{s.projectType || "—"}</td>
                       <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{s.unitType || "—"}</td>
                       <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{s.quality || "—"}</td>

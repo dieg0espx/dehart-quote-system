@@ -76,6 +76,7 @@ export default function Home() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
 
   // Email status
   const [emailSent, setEmailSent] = useState(false);
@@ -148,6 +149,7 @@ export default function Home() {
     setName("");
     setEmail("");
     setPhone("");
+    setAddress("");
     setEmailSent(false);
     setEmailError("");
     setSending(false);
@@ -177,6 +179,7 @@ export default function Home() {
           name,
           email,
           phone,
+          address,
           projectType,
           unitType,
           quality,
@@ -198,10 +201,10 @@ export default function Home() {
     } finally {
       setSending(false);
     }
-  }, [name, email, phone, projectType, unitType, quality, access, sqft, result]);
+  }, [name, email, phone, address, projectType, unitType, quality, access, sqft, result]);
 
   const handleUserInfoSubmit = () => {
-    if (!name.trim() || !email.trim()) return;
+    if (!name.trim() || !email.trim() || !address.trim()) return;
     setAnimating(true);
     setTimeout(() => {
       setStep((prev) => prev + 1);
@@ -395,9 +398,22 @@ export default function Home() {
                     placeholder="(555) 123-4567"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-gray-900 focus:border-[#EC2225] focus:outline-none transition"
+                    placeholder="123 Main St, City, State ZIP"
+                    autoComplete="street-address"
+                  />
+                </div>
                 <button
                   onClick={handleUserInfoSubmit}
-                  disabled={!name.trim() || !email.trim()}
+                  disabled={!name.trim() || !email.trim() || !address.trim()}
                   className="w-full mt-2 px-6 py-3 bg-[#DC2626] text-white font-semibold rounded-xl hover:bg-[#B91C1C] transition shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Get My Estimate →

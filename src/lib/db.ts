@@ -6,6 +6,7 @@ export interface Submission {
   name: string;
   email: string;
   phone: string | null;
+  address: string | null;
   projectType: string | null;
   unitType: string | null;
   quality: string | null;
@@ -26,8 +27,8 @@ function getDb() {
 export async function insertSubmission(data: Omit<Submission, "id" | "timestamp" | "status">) {
   const sql = getDb();
   const result = await sql`
-    INSERT INTO submissions (name, email, phone, project_type, unit_type, quality, access, sqft, estimate_range, message, status)
-    VALUES (${data.name}, ${data.email}, ${data.phone}, ${data.projectType}, ${data.unitType}, ${data.quality}, ${data.access}, ${data.sqft}, ${data.estimateRange}, ${data.message}, 'new')
+    INSERT INTO submissions (name, email, phone, address, project_type, unit_type, quality, access, sqft, estimate_range, message, status)
+    VALUES (${data.name}, ${data.email}, ${data.phone}, ${data.address}, ${data.projectType}, ${data.unitType}, ${data.quality}, ${data.access}, ${data.sqft}, ${data.estimateRange}, ${data.message}, 'new')
     RETURNING id
   `;
   return result[0].id;
@@ -42,6 +43,7 @@ export async function getAllSubmissions(): Promise<Submission[]> {
       name,
       email,
       phone,
+      address,
       project_type as "projectType",
       unit_type as "unitType",
       quality,
