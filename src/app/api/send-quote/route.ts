@@ -1,10 +1,53 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { waitUntil } from "@vercel/functions";
 import { insertSubmission } from "@/lib/db";
+
+// Fire-and-forget POST to the Zapier webhook for every submission. Never
+// throws — a failure here should never affect the response the user sees.
+async function sendZapierWebhook(record: Record<string, unknown>) {
+  const webhookUrl = process.env.ZAPIER_WEBHOOK_URL;
+  if (!webhookUrl) {
+    console.warn("⚠️ ZAPIER_WEBHOOK_URL not configured — skipping Zapier webhook");
+    return;
+  }
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(record),
+    });
+    if (!res.ok) {
+      console.warn(`⚠️ Zapier webhook responded with status ${res.status}`);
+    } else {
+      console.log("✓ Zapier webhook sent");
+    }
+  } catch (webhookError) {
+    console.warn("⚠️ Zapier webhook failed:", webhookError);
+  }
+}
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { name, email, phone, address, projectType, unitType, quality, access, sqft, estimateRange, message } = body;
+  const {
+    name,
+    email,
+    phone,
+    address,
+    projectType,
+    unitType,
+    quality,
+    access,
+    sqft,
+    estimateRange,
+    message,
+    utmSource,
+    utmMedium,
+    utmCampaign,
+    utmContent,
+    utmTerm,
+    gclid,
+  } = body;
 
   if (!name || !email) {
     return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
@@ -18,6 +61,31 @@ export async function POST(request: Request) {
     console.error("Database error:", dbError);
     return NextResponse.json({ error: "Failed to save submission" }, { status: 500 });
   }
+
+  // Send the full submission to Zapier in the background — never blocks or
+  // delays the response below.
+  waitUntil(
+    sendZapierWebhook({
+      timestamp: new Date().toISOString(),
+      name,
+      email,
+      phone,
+      address,
+      projectType,
+      unitType,
+      quality,
+      access,
+      sqft,
+      estimateRange,
+      message,
+      utmSource: utmSource ?? null,
+      utmMedium: utmMedium ?? null,
+      utmCampaign: utmCampaign ?? null,
+      utmContent: utmContent ?? null,
+      utmTerm: utmTerm ?? null,
+      gclid: gclid ?? null,
+    })
+  );
 
   // Try to send emails (don't fail the request if this fails)
   try {
