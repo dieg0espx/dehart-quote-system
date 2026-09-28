@@ -1,7 +1,38 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
+
+// UTM/gclid attribution captured on load and persisted for the whole session,
+// so a mid-flow refresh doesn't lose the original campaign attribution.
+type UtmData = {
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  utmTerm: string | null;
+  gclid: string | null;
+};
+
+const EMPTY_UTM: UtmData = {
+  utmSource: null,
+  utmMedium: null,
+  utmCampaign: null,
+  utmContent: null,
+  utmTerm: null,
+  gclid: null,
+};
+
+const UTM_STORAGE_KEY = "dehart_utm";
+
+const UTM_QUERY_PARAMS: Record<keyof UtmData, string> = {
+  utmSource: "utm_source",
+  utmMedium: "utm_medium",
+  utmCampaign: "utm_campaign",
+  utmContent: "utm_content",
+  utmTerm: "utm_term",
+  gclid: "gclid",
+};
 
 const PRICING = [
   { access: "Hallway", sqft: ">1800", quality: "Good", estimate: 8000, range: "$8,000–$13,000" },
@@ -82,6 +113,37 @@ export default function Home() {
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [sending, setSending] = useState(false);
+
+  // UTM/gclid attribution
+  const [utm, setUtm] = useState<UtmData>(EMPTY_UTM);
+  const completionSignalSent = useRef(false);
+
+  // Capture UTM/gclid params on load; fall back to whatever was already
+  // captured earlier this session (e.g. a mid-flow refresh) when a param
+  // isn't present in the URL this time.
+  useEffect(() => {
+    let stored: Partial<UtmData> = {};
+    try {
+      const raw = sessionStorage.getItem(UTM_STORAGE_KEY);
+      if (raw) stored = JSON.parse(raw);
+    } catch {
+      // sessionStorage unavailable or corrupt — ignore, start fresh
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const merged: UtmData = { ...EMPTY_UTM, ...stored };
+    (Object.keys(UTM_QUERY_PARAMS) as (keyof UtmData)[]).forEach((key) => {
+      const fromUrl = params.get(UTM_QUERY_PARAMS[key]);
+      if (fromUrl) merged[key] = fromUrl;
+    });
+
+    setUtm(merged);
+    try {
+      sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(merged));
+    } catch {
+      // sessionStorage unavailable (e.g. private browsing) — nothing more to do
+    }
+  }, []);
 
   const isGeothermal = unitType === "Geothermal";
   const isCommercial = projectType === "Commercial" && unitType === "Regular";
@@ -187,10 +249,40 @@ export default function Home() {
           sqft,
           estimateRange: result?.type === "estimate" ? (result as { range: string }).range : undefined,
           message: result?.message,
+          utmSource: utm.utmSource,
+          utmMedium: utm.utmMedium,
+          utmCampaign: utm.utmCampaign,
+          utmContent: utm.utmContent,
+          utmTerm: utm.utmTerm,
+          gclid: utm.gclid,
         }),
       });
       if (res.ok) {
         setEmailSent(true);
+
+        // Let the parent (WordPress/GTM) page know a quote was completed.
+        // Guarded so it can only ever fire once per session, and only on a
+        // confirmed successful submission.
+        if (!completionSignalSent.current) {
+          completionSignalSent.current = true;
+          try {
+            window.parent.postMessage(
+              {
+                event: "quote_form_submit",
+                utm_source: utm.utmSource,
+                utm_medium: utm.utmMedium,
+                utm_campaign: utm.utmCampaign,
+                utm_content: utm.utmContent,
+                utm_term: utm.utmTerm,
+                gclid: utm.gclid,
+              },
+              "https://dehartac.com"
+            );
+          } catch {
+            // e.g. no parent frame present — safe to ignore
+          }
+        }
+
         window.location.href = "https://dehartac.com/quote-thank-you/";
       } else {
         const data = await res.json();
@@ -201,7 +293,7 @@ export default function Home() {
     } finally {
       setSending(false);
     }
-  }, [name, email, phone, address, projectType, unitType, quality, access, sqft, result]);
+  }, [name, email, phone, address, projectType, unitType, quality, access, sqft, result, utm]);
 
   const handleUserInfoSubmit = () => {
     if (!name.trim() || !email.trim() || !address.trim()) return;
